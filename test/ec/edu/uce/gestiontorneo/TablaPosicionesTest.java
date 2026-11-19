@@ -29,7 +29,6 @@ public class TablaPosicionesTest {
     public void testMetodosTablaPosiciones() {
         TablaPosiciones tabla = new TablaPosiciones();
 
-        // En JUnit 4, llamar a los métodos es suficiente. Si hay un error interno, el test fallará automáticamente.
         tabla.calcularPuntos();
         tabla.actualizarRanking();
     }

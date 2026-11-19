@@ -7,6 +7,15 @@ public class Partido {
     private int marcadorLocal;
     private int marcadorVisita;
 
+    // Relación 1 a 1 (Agregación): Equipo local que disputa el partido
+    private Equipo equipoLocal;
+
+    // Relación 1 a 1 (Agregación): Equipo visitante que disputa el partido
+    private Equipo equipoVisitante;
+
+    // Relación 1 a 1 (Composición): Acta oficial asociada al ciclo de vida del partido
+    private ActaPartido actaPartido;
+
     public Partido() {
         this.estado = "Pendiente";
         this.marcadorLocal = 0;
@@ -94,5 +103,32 @@ public class Partido {
             throw new IllegalArgumentException("El marcador visita no puede ser negativo.");
         }
         this.marcadorVisita = marcadorVisita;
+    }
+
+    // Getter y Setter de la relación 1 a 1 (Agregación) con Equipo local
+    public Equipo getEquipoLocal() {
+        return equipoLocal;
+    }
+
+    public void setEquipoLocal(Equipo equipoLocal) {
+        this.equipoLocal = equipoLocal;
+    }
+
+    // Getter y Setter de la relación 1 a 1 (Agregación) con Equipo visitante
+    public Equipo getEquipoVisitante() {
+        return equipoVisitante;
+    }
+
+    public void setEquipoVisitante(Equipo equipoVisitante) {
+        this.equipoVisitante = equipoVisitante;
+    }
+
+    // Getter y Setter de la relación 1 a 1 (Composición) con ActaPartido
+    public ActaPartido getActaPartido() {
+        return actaPartido;
+    }
+
+    public void setActaPartido(ActaPartido actaPartido) {
+        this.actaPartido = actaPartido;
     }
 }

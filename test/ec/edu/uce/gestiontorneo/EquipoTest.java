@@ -40,4 +40,30 @@ public class EquipoTest {
         assertEquals(1, equipo.getPlantilla().size());
         assertEquals("Carlos", equipo.getPlantilla().get(0).getNombre());
     }
+
+    @Test
+    public void testSobrecargaAgregarYEliminarJugadorPorObjeto() {
+        Equipo equipo = new Equipo(1, "Liga de Quito", "escudo.png");
+        Jugador j1 = new Jugador(10, "Jugador Uno", 9, "Delantero");
+        Jugador j2 = new Jugador(11, "Jugador Dos", 8, "Volante");
+
+        equipo.agregarJugador(java.util.Arrays.asList(j1, j2));
+        assertEquals(2, equipo.getPlantilla().size());
+
+        equipo.eliminarJugador(j1);
+        assertEquals(1, equipo.getPlantilla().size());
+        assertEquals("Jugador Dos", equipo.getPlantilla().get(0).getNombre());
+    }
+
+    @Test
+    public void testEqualsYHashCodeEquipo() {
+        Equipo e1 = new Equipo(1, "Liga de Quito", "escudo.png");
+        Equipo e2 = new Equipo(1, "Liga de Quito", "escudo.png");
+        Equipo e3 = new Equipo(2, "Aucas", "otro.png");
+
+        assertEquals(e1, e2);
+        assertEquals(e1.hashCode(), e2.hashCode());
+        assertNotEquals(e1, e3);
+        assertNotEquals(e1, null);
+    }
 }

@@ -34,4 +34,31 @@ public class TorneoTest {
         torneo.crearTorneo();
         torneo.configurarReg();
     }
+
+    @Test
+    public void testSobrecargaSettersYConfigurarConObjetoTorneo() {
+        Torneo origen = new Torneo(1, "LigaPro UCE", 8, "Reglamento oficial");
+        Torneo destino = new Torneo();
+
+        assertTrue(destino.setNombre(origen));
+        assertTrue(destino.setNumeroEquipos(origen));
+        assertTrue(destino.setReglamento(origen));
+        destino.configurarReg(origen);
+
+        assertEquals("LigaPro UCE", destino.getNombre());
+        assertEquals(8, destino.getNumeroEquipos());
+        assertEquals("Reglamento oficial", destino.getReglamento());
+    }
+
+    @Test
+    public void testEqualsYHashCodeTorneo() {
+        Torneo t1 = new Torneo(1, "LigaPro UCE", 8, "Reglamento oficial");
+        Torneo t2 = new Torneo(1, "LigaPro UCE", 8, "Reglamento oficial");
+        Torneo t3 = new Torneo(2, "Copa Quito", 6, "Reglamento base");
+
+        assertEquals(t1, t2);
+        assertEquals(t1.hashCode(), t2.hashCode());
+        assertNotEquals(t1, t3);
+        assertNotEquals(t1, null);
+    }
 }

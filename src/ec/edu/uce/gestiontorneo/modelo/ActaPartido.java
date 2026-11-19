@@ -9,8 +9,15 @@ public class ActaPartido {
     private int tarjetasAmarillas;
     private int tarjetasRojas;
 
+    // Relación 1 a 1 (Composición): Partido al que pertenece el acta
+    private Partido partido;
+
+    // Relación 1 a muchos (Agregación): Lista de sanciones registradas en el acta
+    private List<Sancion> sanciones;
+
     public ActaPartido() {
         this.minutosGoles = new ArrayList<>();
+        this.sanciones = new ArrayList<>();
     }
 
     public ActaPartido(int idActa, List<String> minutosGoles, int tarjetasAmarillas, int tarjetasRojas) {
@@ -18,6 +25,7 @@ public class ActaPartido {
         this.minutosGoles = (minutosGoles != null) ? minutosGoles : new ArrayList<>();
         setTarjetasAmarillas(tarjetasAmarillas);
         setTarjetasRojas(tarjetasRojas);
+        this.sanciones = new ArrayList<>();
     }
 
     // Métodos de negocio del diagrama de clases
@@ -77,5 +85,23 @@ public class ActaPartido {
             throw new IllegalArgumentException("Las tarjetas rojas no pueden ser negativas.");
         }
         this.tarjetasRojas = tarjetasRojas;
+    }
+
+    // Getter y Setter de la relación 1 a 1 (Composición) con Partido
+    public Partido getPartido() {
+        return partido;
+    }
+
+    public void setPartido(Partido partido) {
+        this.partido = partido;
+    }
+
+    // Getter y Setter de la relación 1 a muchos (Agregación) con List<Sancion>
+    public List<Sancion> getSanciones() {
+        return sanciones;
+    }
+
+    public void setSanciones(List<Sancion> sanciones) {
+        this.sanciones = (sanciones != null) ? sanciones : new ArrayList<>();
     }
 }

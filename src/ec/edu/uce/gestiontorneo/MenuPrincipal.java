@@ -7,8 +7,9 @@ import java.util.ArrayList;
 import ec.edu.uce.gestiontorneo.modelo.ActaPartido;
 import ec.edu.uce.gestiontorneo.modelo.Equipo;
 import ec.edu.uce.gestiontorneo.modelo.Jugador;
-import ec.edu.uce.gestiontorneo.util.Validador;
+import ec.edu.uce.gestiontorneo.modelo.Partido;
 import ec.edu.uce.gestiontorneo.modelo.Torneo;
+import ec.edu.uce.gestiontorneo.util.Validador;
 
 public class MenuPrincipal {
 
@@ -19,14 +20,17 @@ public class MenuPrincipal {
 
         scanner.close();
     }
-    // Lista en memoria para almacenar los torneos y evitar IDs duplicados
+
+    // Listas en memoria para almacenar entidades y evitar IDs duplicados
     private static List<Torneo> listaTorneos = new ArrayList<>();
     private static List<Equipo> listaEquipos = new ArrayList<>();
+    private static List<Partido> listaPartidos = new ArrayList<>();
     private static List<String> listaHistorialPartidos = new ArrayList<>();
 
     private static void menuUnificado(Scanner scanner) {
         int opcion;
         do {
+            System.out.println("\n=== LIGAFLEX - MENÚ PRINCIPAL ===");
             System.out.println("1. Gestión de Torneos");
             System.out.println("2. Gestión de Equipos");
             System.out.println("3. Gestión de Partidos");
@@ -58,7 +62,6 @@ public class MenuPrincipal {
         } while (opcion != 5);
     }
 
-
     // Submenú 1: Torneos y Tabla de Posiciones
     private static void subgrupoTorneosytabla(Scanner scanner) {
         int opcionTorneo;
@@ -78,7 +81,6 @@ public class MenuPrincipal {
                     System.out.print("Ingrese el ID del torneo (número positivo): ");
                     int idTorneo = Validador.validarEntero(scanner, "");
 
-                    // Validar si el ID ya existe en la lista
                     boolean idRepetido = false;
                     for (Torneo t : listaTorneos) {
                         if (t.getIdTorneo() == idTorneo) {
@@ -106,21 +108,20 @@ public class MenuPrincipal {
                     System.out.print("Ingrese el reglamento: ");
                     String reglamento = scanner.nextLine();
 
-                    // Instanciar y configurar usando los setters con validación
                     Torneo nuevoTorneo = new Torneo();
                     if (nuevoTorneo.setIdTorneo(idTorneo) && nuevoTorneo.setNumeroEquipos(numeroEquipos)) {
-                        nuevoTorneo.setNombre(nombre);
-                        nuevoTorneo.setReglamento(reglamento);
+                        if (!nuevoTorneo.setNombre(nombre) || !nuevoTorneo.setReglamento(reglamento)) {
+                            System.out.println("[Error] Nombre o reglamento inválido.");
+                            break;
+                        }
 
                         nuevoTorneo.crearTorneo();
                         nuevoTorneo.configurarReg();
 
-                        // Guardar en la lista para control de duplicados
                         listaTorneos.add(nuevoTorneo);
-
-                        System.out.println("[Éxito] Torneo creado y registrado en memoria junto con su Tabla de Posiciones.");
+                        System.out.println("[Éxito] Torneo creado y registrado en memoria.");
                     } else {
-                        System.out.println("[Error] Datos inválidos (ID menor a 0 o número de equipos menor a 2).");
+                        System.out.println("[Error] Datos inválidos (ID menor o igual a 0 o número de equipos menor a 2).");
                     }
                     break;
 
@@ -144,8 +145,7 @@ public class MenuPrincipal {
                     if (torneoEncontrado != null) {
                         System.out.print("Ingrese el nuevo nombre del torneo: ");
                         String nuevoNombre = scanner.nextLine();
-                        if (Validador.validarFormatoTexto(nuevoNombre)) {
-                            torneoEncontrado.setNombre(nuevoNombre);
+                        if (Validador.validarFormatoTexto(nuevoNombre) && torneoEncontrado.setNombre(nuevoNombre)) {
                             System.out.println("[Éxito] Torneo modificado correctamente.");
                         } else {
                             System.out.println("[Error] Nombre inválido.");
@@ -166,7 +166,7 @@ public class MenuPrincipal {
 
                     boolean eliminado = listaTorneos.removeIf(t -> t.getIdTorneo() == idEliminar);
                     if (eliminado) {
-                        System.out.println("[Éxito] Torneo y su tabla asociada eliminados correctamente.");
+                        System.out.println("[Éxito] Torneo eliminado correctamente.");
                     } else {
                         System.out.println("[Error] No se encontró un torneo con ese ID.");
                     }
@@ -182,7 +182,7 @@ public class MenuPrincipal {
         } while (opcionTorneo != 4);
     }
 
-    // Submenú 2: Gestión de Equipos y Plantillas actualizado
+    // Submenú 2: Gestión de Equipos y Plantillas
     private static void subgrupoGestionEquipos(Scanner scanner) {
         int opcionEquipo;
         do {
@@ -199,7 +199,6 @@ public class MenuPrincipal {
 
             switch (opcionEquipo) {
                 case 1:
-                    // ... (tu código de Inscribir Equipo se queda igual) ...
                     System.out.println("\n--- INSCRIBIR NUEVO EQUIPO ---");
                     System.out.print("Ingrese el ID del equipo (número positivo): ");
                     int id = Validador.validarEntero(scanner, "");
@@ -228,17 +227,20 @@ public class MenuPrincipal {
                     System.out.print("Ingrese la descripción o escudo: ");
                     String escudo = scanner.nextLine();
 
-                    Equipo nuevoEquipo = new Equipo();
-                    nuevoEquipo.setIdEquipo(id);
-                    nuevoEquipo.setNombreEquipo(nombreEquipo);
-                    nuevoEquipo.setEscudo(escudo);
+                    try {
+                        Equipo nuevoEquipo = new Equipo();
+                        nuevoEquipo.setIdEquipo(id);
+                        nuevoEquipo.setNombreEquipo(nombreEquipo);
+                        nuevoEquipo.setEscudo(escudo);
 
-                    listaEquipos.add(nuevoEquipo);
-                    System.out.println("[Éxito] Equipo '" + nombreEquipo + "' inscrito correctamente.");
+                        listaEquipos.add(nuevoEquipo);
+                        System.out.println("[Éxito] Equipo '" + nombreEquipo + "' inscrito correctamente.");
+                    } catch (IllegalArgumentException e) {
+                        System.out.println("[Error de Validación] " + e.getMessage());
+                    }
                     break;
 
                 case 2:
-                    // ... (Modificar Equipo se queda igual) ...
                     System.out.println("\n--- MODIFICAR EQUIPO ---");
                     if (listaEquipos.isEmpty()) {
                         System.out.println("[Aviso] No hay equipos registrados.");
@@ -259,8 +261,12 @@ public class MenuPrincipal {
                         System.out.print("Ingrese el nuevo nombre del equipo: ");
                         String nuevoNombre = scanner.nextLine();
                         if (Validador.validarFormatoTexto(nuevoNombre)) {
-                            eqMod.setNombreEquipo(nuevoNombre);
-                            System.out.println("[Éxito] Equipo modificado correctamente.");
+                            try {
+                                eqMod.setNombreEquipo(nuevoNombre);
+                                System.out.println("[Éxito] Equipo modificado correctamente.");
+                            } catch (IllegalArgumentException e) {
+                                System.out.println("[Error de Validación] " + e.getMessage());
+                            }
                         } else {
                             System.out.println("[Error] Nombre inválido.");
                         }
@@ -270,7 +276,6 @@ public class MenuPrincipal {
                     break;
 
                 case 3:
-                    // --- AQUÍ ESTÁ LA MAGIA PARA VER LOS ESCUDOS ---
                     System.out.println("\n--- LISTA DE EQUIPOS INSCRITOS ---");
                     if (listaEquipos.isEmpty()) {
                         System.out.println("[Aviso] No hay equipos registrados todavía.");
@@ -284,7 +289,6 @@ public class MenuPrincipal {
                     break;
 
                 case 4:
-                    // Eliminar Equipo (antes era 3, ahora subió a 4)
                     System.out.println("\n--- ELIMINAR EQUIPO ---");
                     if (listaEquipos.isEmpty()) {
                         System.out.println("[Aviso] No hay equipos registrados.");
@@ -302,7 +306,6 @@ public class MenuPrincipal {
                     break;
 
                 case 5:
-                    // Gestionar Plantilla (subió a 5)
                     System.out.println("\n--- ACCEDER A PLANTILLA DE JUGADORES ---");
                     if (listaEquipos.isEmpty()) {
                         System.out.println("[Aviso] No hay equipos registrados para gestionar plantillas.");
@@ -352,7 +355,6 @@ public class MenuPrincipal {
                 case 1:
                     System.out.println("\n--- AGREGAR JUGADOR A LA PLANTILLA ---");
 
-                    // Validar límite máximo de 25 usando el método que ya tiene tu clase Equipo
                     if (equipoSeleccionado.getPlantilla().size() >= 25) {
                         System.out.println("[Error] Este equipo ya tiene el cupo lleno (25 jugadores).");
                         break;
@@ -360,6 +362,19 @@ public class MenuPrincipal {
 
                     System.out.print("Ingrese el ID del jugador: ");
                     int idJugador = Validador.validarEntero(scanner, "");
+
+                    boolean jugadorDuplicado = false;
+                    for (Jugador j : equipoSeleccionado.getPlantilla()) {
+                        if (j.getIdJugador() == idJugador) {
+                            jugadorDuplicado = true;
+                            break;
+                        }
+                    }
+
+                    if (jugadorDuplicado) {
+                        System.out.println("[Error] Ya existe un jugador con el ID " + idJugador + " en este equipo.");
+                        break;
+                    }
 
                     System.out.print("Ingrese el nombre completo del jugador: ");
                     String nombreJugador = scanner.nextLine();
@@ -380,14 +395,17 @@ public class MenuPrincipal {
                         break;
                     }
 
-                    // Instanciar el jugador
-                    Jugador nuevoJugador = new Jugador();
-                    nuevoJugador.setIdJugador(idJugador);
-                    nuevoJugador.setNombre(nombreJugador);
-                    nuevoJugador.setDorsal(dorsal);
-                    nuevoJugador.setPosicion(posicion);
+                    try {
+                        Jugador nuevoJugador = new Jugador();
+                        nuevoJugador.setIdJugador(idJugador);
+                        nuevoJugador.setNombre(nombreJugador);
+                        nuevoJugador.setDorsal(dorsal);
+                        nuevoJugador.setPosicion(posicion);
 
-                    equipoSeleccionado.agregarJugador(nuevoJugador);
+                        equipoSeleccionado.agregarJugador(nuevoJugador);
+                    } catch (IllegalArgumentException e) {
+                        System.out.println("[Error de Validación] " + e.getMessage());
+                    }
                     break;
 
                 case 2:
@@ -411,7 +429,7 @@ public class MenuPrincipal {
         } while (opcionPlantilla != 0);
     }
 
-    // Submenú 3: Partidos
+    // Submenú 3: Partidos y Actas
     private static void subgrupoPartidosyActas(Scanner scanner) {
         int opcionPartido;
         do {
@@ -428,6 +446,19 @@ public class MenuPrincipal {
                     System.out.println("\n--- PROGRAMAR NUEVO PARTIDO ---");
                     System.out.print("Ingrese el ID del partido: ");
                     int idPartido = Validador.validarEntero(scanner, "");
+
+                    boolean partidoDuplicado = false;
+                    for (Partido p : listaPartidos) {
+                        if (p.getIdPartido() == idPartido) {
+                            partidoDuplicado = true;
+                            break;
+                        }
+                    }
+
+                    if (partidoDuplicado) {
+                        System.out.println("[Error] Ya existe un partido registrado con el ID " + idPartido + ".");
+                        break;
+                    }
 
                     System.out.print("Ingrese el nombre del equipo Local: ");
                     String equipoLocal = scanner.nextLine();
@@ -448,9 +479,22 @@ public class MenuPrincipal {
                     System.out.print("Ingrese la fecha del encuentro (Ej. 2026-06-15): ");
                     String fecha = scanner.nextLine();
 
-                    // Aquí puedes instanciar tu clase Partido cuando la conectes por completo:
-                    // Partido partido = new Partido(idPartido, equipoLocal, equipoVisitante, fecha);
-                    System.out.println("[Éxito] Partido programado correctamente entre " + equipoLocal + " y " + equipoVisitante + " para la fecha " + fecha + ".");
+                    try {
+                        Partido partido = new Partido();
+                        partido.setIdPartido(idPartido);
+                        partido.programarPartido(fecha);
+
+                        listaPartidos.add(partido);
+                        listaHistorialPartidos.add("Partido ID: " + idPartido +
+                                "\n Local: " + equipoLocal +
+                                "\n Visitante: " + equipoVisitante +
+                                "\n Fecha: " + fecha +
+                                "\n Estado: " + partido.getEstado());
+
+                        System.out.println("[Éxito] Partido programado correctamente entre " + equipoLocal + " y " + equipoVisitante + " para la fecha " + fecha + ".");
+                    } catch (IllegalArgumentException e) {
+                        System.out.println("[Error de Validación] " + e.getMessage());
+                    }
                     break;
 
                 case 2:
@@ -459,7 +503,6 @@ public class MenuPrincipal {
                         System.out.print("Ingrese el ID del acta: ");
                         int idActa = Validador.validarEntero(scanner, "");
 
-                        // Instanciamos la clase real de tu compañero
                         ActaPartido acta = new ActaPartido();
                         acta.setIdActa(idActa);
 
@@ -472,17 +515,13 @@ public class MenuPrincipal {
                         System.out.print("Ingrese cantidad de tarjetas rojas: ");
                         int rojas = Validador.validarEntero(scanner, "");
 
-                        // Usamos los métodos de negocio de la clase
                         acta.registrarEventos(minutoGol, amarillas, rojas);
-
-                        // Generamos el reporte en consola
                         acta.generarReporte();
 
                         System.out.println("[Éxito] Acta procesada y guardada correctamente.");
 
-                        // Cuando registres el acta con éxito en el subgrupoPartidosyActas:
-                        String resumenPartido = " Partido ID: " + idActa +
-                                "\n Goles Totales / Eventos: " + minutoGol +
+                        String resumenPartido = "Acta / Partido ID: " + idActa +
+                                "\n Goles Totales / Eventos: " + (minutoGol.trim().isEmpty() ? "Sin goles" : minutoGol) +
                                 "\n Tarjetas Amarillas: " + amarillas +
                                 "\n Tarjetas Rojas: " + rojas;
 
@@ -502,7 +541,7 @@ public class MenuPrincipal {
             }
         } while (opcionPartido != 3);
     }
-    //Submenú 4: Consultas
+
     // Submenú 4: Módulo de Consultas (Aficionado / Resultados)
     private static void subgrupoConsultas(Scanner scanner) {
         int opcionConsulta;
@@ -510,8 +549,8 @@ public class MenuPrincipal {
             System.out.println("\n========================================");
             System.out.println("     MÓDULO DE CONSULTAS (AFICIONADO)   ");
             System.out.println("========================================");
-            System.out.println("1. Consultar Torneos Registrados");
-            System.out.println("2. Consultar Equipos Inscritos");
+            System.out.println("1. Consultar Torneos");
+            System.out.println("2. Consultar Equipos");
             System.out.println("3. Consultar Resultados y Partidos");
             System.out.println("0. Volver al Menú Principal");
             System.out.print("Seleccione una opción de consulta: ");
@@ -544,7 +583,6 @@ public class MenuPrincipal {
                                     " | Club: " + e.getNombreEquipo() +
                                     " | Escudo/Desc: " + e.getEscudo());
 
-                            // Mostrar la plantilla de jugadores de este equipo si tiene
                             if (e.getPlantilla() == null || e.getPlantilla().isEmpty()) {
                                 System.out.println("  ↳ Plantilla: (Aún sin jugadores inscritos)");
                             } else {

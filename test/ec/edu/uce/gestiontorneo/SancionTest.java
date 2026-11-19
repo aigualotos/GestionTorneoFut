@@ -33,4 +33,30 @@ public class SancionTest {
         Sancion sancion = new Sancion();
         sancion.setMotivo(""); // Vacío debe lanzar excepción
     }
+
+    @Test
+    public void testSobrecargaSettersConObjetoSancion() {
+        Sancion origen = new Sancion(101, "Doble amarilla", 2, true);
+        Sancion destino = new Sancion();
+
+        destino.setMotivo(origen);
+        destino.setPartidosSuspension(origen);
+        destino.setEstadoSancion(origen);
+
+        assertEquals("Doble amarilla", destino.getMotivo());
+        assertEquals(2, destino.getPartidosSuspension());
+        assertTrue(destino.isEstadoSancion());
+    }
+
+    @Test
+    public void testEqualsYHashCodeSancion() {
+        Sancion s1 = new Sancion(101, "Tarjeta roja", 2, true);
+        Sancion s2 = new Sancion(101, "Tarjeta roja", 2, true);
+        Sancion s3 = new Sancion(102, "Juego brusco", 1, false);
+
+        assertEquals(s1, s2);
+        assertEquals(s1.hashCode(), s2.hashCode());
+        assertNotEquals(s1, s3);
+        assertNotEquals(s1, null);
+    }
 }
